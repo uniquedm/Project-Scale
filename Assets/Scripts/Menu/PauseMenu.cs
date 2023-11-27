@@ -8,9 +8,12 @@ public class PauseMenu : MonoBehaviour
 {
     public Boolean isPaused;
     public GameObject pauseMenu;
+    public GameObject mainMenu;
+    public List<GameObject> otherMenus;
     // Start is called before the first frame update
     void Start()
     {
+        Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -28,14 +31,23 @@ public class PauseMenu : MonoBehaviour
         this.isPaused = isPaused;
         if (!isPaused) {
             // Lock the mouse cursor to the game screen.
+            Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
         }
-        else
-        {
+        else {
+            Cursor.visible = true;
             Cursor.lockState = CursorLockMode.Confined;
         }
         Time.timeScale = isPaused ? 0.0f : 1.0f;
         pauseMenu.SetActive(isPaused);
+        mainMenu.SetActive(isPaused);
+        if (otherMenus.Count > 0) {
+            foreach (GameObject otherMenu in otherMenus)
+            {
+                otherMenu.SetActive(false);
+
+            }
+        }
     }
 
     public void RestartLevel()
