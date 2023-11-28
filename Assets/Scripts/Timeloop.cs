@@ -1,3 +1,4 @@
+using Doublsb.Dialog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,27 +8,41 @@ using UnityEngine.UIElements;
 
 public class Timeloop : MonoBehaviour
 {
+    [Header("Timer Details")]
     public TextMeshProUGUI timeUI;
     public float timeElapsed;
-
-    public GameObject player;
-    public GameObject playerCamera;
-    public GameObject respawnPoint;
-    public String respawnSequence;
-
     [Range(10f, 300f)]
     public float loopLength = 60f;
-
     private Boolean startTimeloop;
-    private Animator animator;
-    private float originalCameraHeight;
-    private Boolean startRespawn;
-    private Behaviour pauseMenu;
-
-    public float targetCameraHeight;
-    public float lerpSpeed;
-
     public bool StartTimeloop { get => startTimeloop; set => startTimeloop = value; }
+
+    [Header("Player Details")]
+    public GameObject player;
+    public GameObject playerCamera;
+    public float cameraLerpSpeed;
+    public float playerFalldownHeight;
+    private float originalCameraHeight;
+
+    [System.Serializable]
+    public struct DialogInputData
+    {
+        public string message;
+        public string character;
+        public bool skippable;
+    }
+
+    [Header("Respawn Details")]
+    public GameObject respawnPoint;
+    public String respawnSequence;
+    private Boolean startRespawn;
+    private Animator animator;
+    public float spawnTime = 2f;
+    private int respawnCount = 0;
+    public List<DialogInputData> respawnDialogs;
+
+    [Header("Misc")]
+    public DialogManager dialogManager;
+    private Behaviour pauseMenu;
 
     // Start is called before the first frame update
     void Start()
@@ -53,21 +68,24 @@ public class Timeloop : MonoBehaviour
             timeElapsed = 0;
             animator.PlayInFixedTime(respawnSequence);
             startRespawn = true;
-            StartCoroutine(spawnPlayer(2));
+            StartCoroutine(spawnPlayer(spawnTime));
         }
         if (startRespawn) {
             Transform cameraTransform = playerCamera.GetComponent<Transform>();
             cameraTransform.localPosition = new Vector3(
                 cameraTransform.localPosition.x,
-                Mathf.Lerp(cameraTransform.localPosition.y, targetCameraHeight, lerpSpeed * Time.deltaTime),
+                Mathf.Lerp(cameraTransform.localPosition.y, playerFalldownHeight, cameraLerpSpeed * Time.deltaTime),
                 cameraTransform.localPosition.z
             );
         }
     }
 
-    IEnumerator spawnPlayer(int spawnTimeInSeconds)
+    IEnumerator spawnPlayer(float spawnTimeInSeconds)
     {
         yield return new WaitForSeconds(spawnTimeInSeconds);
+        DialogInputData data = respawnDialogs[respawnCount < respawnDialogs.Count ? respawnCount : respawnDialogs.Count - 1];
+        DialogData dialogData = new DialogData(data.message, data.character, null, data.skippable);
+        dialogManager.Show(dialogData);
         startRespawn = false;
         startTimeloop = true;
         pauseMenu.enabled = true;
@@ -80,5 +98,6 @@ public class Timeloop : MonoBehaviour
             cameraTransform.localPosition.z
         );
         cameraTransform.localRotation = Quaternion.identity;
+        respawnCount++;
     }
 }
