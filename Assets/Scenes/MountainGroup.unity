@@ -16320,6 +16320,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Old building
       objectReference: {fileID: 0}
+    - target: {fileID: 144790, guid: 41a9e4f2924047e498f822fc54a2e08f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 156368, guid: 41a9e4f2924047e498f822fc54a2e08f, type: 3}
       propertyPath: m_IsActive
       value: 1
