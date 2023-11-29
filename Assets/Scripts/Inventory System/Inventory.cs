@@ -1,27 +1,35 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UI.ThreeDimensional;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
+
+[System.Serializable]
+public struct InventoryItem
+{
+    public string itemName;
+    public string itemDescription;
+    public int slot;
+    public GameObject item;
+    public GameObject prefab;
+
+    public InventoryItem(string itemName, string itemDescription, int slot, GameObject item, GameObject prefab) : this()
+    {
+        this.itemName = itemName;
+        this.itemDescription = itemDescription;
+        this.slot = slot;
+        this.item = item;
+        this.prefab = prefab;
+    }
+}
 
 public class Inventory : MonoBehaviour
 {
     // Singleton instance
     private static Inventory _instance;
-    public GameObject inventoryUI;
-    public GameObject inventoryCamera;
-    public Volume renderVolume;
-    public VolumeProfile inventoryProfile;
-    public VolumeProfile renderProfile;
-    public GameObject itemPreviewLocation;
-    public FirstPersonLook playerLookScript;
-    public int focusedLayer;
-
-    private GameObject currentItem;
-    public float rotationSpeed = 10f;
-    private int currentIndex = 0;
-    public TextMeshProUGUI itemNameUIText;
-    public TextMeshProUGUI itemDescriptionUIText;
 
     // Public property to access the Inventory instance
     public static Inventory Instance
@@ -45,12 +53,31 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    public List<GameObject> items;
+    public List<InventoryItem> ItemsData { 
+        get => itemsData;
+        set => itemsData = value;
+    }
+
+    [Header("Inventory UI")]
+    public GameObject inventoryUI;
+    public GameObject inventoryCamera;
+    public Volume renderVolume;
+    public VolumeProfile inventoryProfile;
+    public VolumeProfile renderProfile;
+    public GameObject itemPreviewLocation;
+    public int focusedLayer;
+    private GameObject currentItem;
+    public float rotationSpeed = 10f;
+    private int currentIndex = 0;
+    public TextMeshProUGUI itemNameUIText;
+    public TextMeshProUGUI itemDescriptionUIText;
+    [Header("Inventory Data")]
+    public List<InventoryItem> itemsData;
 
     // Start is called before the first frame update
     void Start()
     {
-        items = new List<GameObject>();
+        itemsData = new List<InventoryItem>();
     }
 
     // Update is called once per frame
@@ -90,36 +117,35 @@ public class Inventory : MonoBehaviour
         inventoryCamera.SetActive(toggle);
         Behaviour behaviour = this.GetComponent<FirstPersonMovement>();
         behaviour.enabled = !toggle;
-        playerLookScript.enabled = !toggle;
         renderVolume.profile = toggle ? inventoryProfile : renderProfile;
         if (index < 0)
         {
-            index = items.Count - 1;
+            index = itemsData.Count - 1;
         }
-        else if (items.Count > 0)
+        else if (itemsData.Count > 0)
         {
-            index %= items.Count;
+            index %= itemsData.Count;
         }
         currentIndex = index;
-        if (items.Count > 0)
+        if (itemsData.Count > 0)
         {
             itemNameUIText.enabled = toggle;
             itemDescriptionUIText.enabled = toggle;
-            items[index].transform.parent = itemPreviewLocation.transform;
-            items[index].transform.localPosition = Vector3.zero;
-            items[index].tag = "Untagged";
-            items[index].layer = focusedLayer;
-            currentItem = items[index];
-            InteractableObject interactableObject = items[index].GetComponent<InteractableObject>();
+            itemsData[index].item.transform.parent = itemPreviewLocation.transform;
+            itemsData[index].item.transform.localPosition = Vector3.zero;
+            itemsData[index].item.tag = "Untagged";
+            itemsData[index].item.layer = focusedLayer;
+            currentItem = itemsData[index].item;
+            InteractableObject interactableObject = itemsData[index].item.GetComponent<InteractableObject>();
             itemNameUIText.text = interactableObject.itemName;
             itemDescriptionUIText.text = interactableObject.itemDescription;
-            for (int i = 0; i < items.Count; i++) {
+            for (int i = 0; i < itemsData.Count; i++) {
                 if (i==index) {
-                    items[i].SetActive(toggle);
+                    itemsData[i].item.SetActive(toggle);
                 }
                 else
                 {
-                    items[i].SetActive(false);
+                    itemsData[i].item.SetActive(false);
                 }
             }
         }

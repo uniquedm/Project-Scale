@@ -11,9 +11,15 @@ public class InteractableObject : MonoBehaviour
     [Header("Inventory Details")]
     public string itemName;
     public string itemDescription;
+    public int slot = -1;
+    public GameObject prefab;
     [Header("Dialog")]
     public DialogInputData[] dialogs;
     public DialogManager dialogManager;
+    [Header("Game Manager Event")]
+    public Boolean triggerEvent;
+    [EventList("Use Workbench", "Exit Workbench")]
+    public string eventName;
 
     // Start is called before the first frame update
     void Start()
@@ -33,13 +39,22 @@ public class InteractableObject : MonoBehaviour
     public void Interaction() {
         if (canPickup) {
             Inventory inventory = Inventory.Instance;
-            inventory.items.Add(this.gameObject);
+            InventoryItem itemData = new InventoryItem(this.itemName, 
+                                                        this.itemDescription, 
+                                                        this.slot, 
+                                                        this.gameObject,
+                                                        this.prefab);
+            inventory.ItemsData.Add(itemData);
             this.gameObject.SetActive(false);
         }
         if (dialogs.Length > 0) { 
             DialogInputData dialog = dialogs[Random.Range(0, dialogs.Length)];
             DialogData dialogData = new DialogData(dialog.GetFormattedMessage(), dialog.character, null, dialog.skippable);
             dialogManager.Show(dialogData);
+        }
+        if (triggerEvent)
+        {
+            GameManager.Instance.TriggerEvent(eventName);
         }
     }
 }
