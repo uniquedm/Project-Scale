@@ -2,14 +2,27 @@ using Doublsb.Dialog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
+
+[System.Serializable]
+public struct DialogInputData
+{
+    public string message;
+    public string character;
+    public bool skippable;
+    public AudioClip audio;
+    public float waitTime;
+    // Method to format the message based on other fields
+    public string GetFormattedMessage()
+    {
+        return $"{message}/wait:{waitTime}//close/";
+    }
+}
+
 
 public class Timeloop : MonoBehaviour
 {
     [Header("Timer Details")]
-    public TextMeshProUGUI timeUI;
     public float timeElapsed;
     [Range(10f, 300f)]
     public float loopLength = 60f;
@@ -22,14 +35,6 @@ public class Timeloop : MonoBehaviour
     public float cameraLerpSpeed;
     public float playerFalldownHeight;
     private float originalCameraHeight;
-
-    [System.Serializable]
-    public struct DialogInputData
-    {
-        public string message;
-        public string character;
-        public bool skippable;
-    }
 
     [Header("Respawn Details")]
     public GameObject respawnPoint;
@@ -59,7 +64,6 @@ public class Timeloop : MonoBehaviour
     {
         if (startTimeloop) {
             timeElapsed += Time.deltaTime;
-            timeUI.text = timeElapsed.ToString();
         }
         if (timeElapsed > loopLength)
         {
@@ -84,7 +88,7 @@ public class Timeloop : MonoBehaviour
     {
         yield return new WaitForSeconds(spawnTimeInSeconds);
         DialogInputData data = respawnDialogs[respawnCount < respawnDialogs.Count ? respawnCount : respawnDialogs.Count - 1];
-        DialogData dialogData = new DialogData(data.message, data.character, null, data.skippable);
+        DialogData dialogData = new DialogData(data.GetFormattedMessage(), data.character, null, data.skippable);
         dialogManager.Show(dialogData);
         startRespawn = false;
         startTimeloop = true;
