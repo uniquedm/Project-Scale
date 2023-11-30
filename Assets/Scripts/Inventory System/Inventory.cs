@@ -195,7 +195,9 @@ public class Inventory : MonoBehaviour
             }
             else
             {
+                GameObject gameObject = itemsData[currentIndex].item;
                 itemsData.Remove(itemsData[currentIndex]);
+                Destroy(gameObject);
                 interactableObject.ItemsFound();
                 ToggleInventory(false);
                 itemMatched = true; // Set the flag to exit the loop

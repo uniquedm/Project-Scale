@@ -1,12 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 
-public class EventListExample : MonoBehaviour
-{
-    [EventList]
-    public string selectedEvent;
-}
-
 // Custom property drawer for the EventList attribute
 [CustomPropertyDrawer(typeof(EventListAttribute))]
 public class EventListDrawer : PropertyDrawer

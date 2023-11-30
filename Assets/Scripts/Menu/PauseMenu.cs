@@ -53,7 +53,9 @@ public class PauseMenu : MonoBehaviour
     public void RestartLevel()
     {
         TogglePause(false);
-        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.Confined;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void QuitGame()

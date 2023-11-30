@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviour
         if (_instance == null)
         {
             _instance = this;
-            DontDestroyOnLoad(gameObject); // Don't destroy the GameManager when loading new scenes
+            //DontDestroyOnLoad(gameObject); // Don't destroy the GameManager when loading new scenes
         }
         else
         {
