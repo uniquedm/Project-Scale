@@ -31,7 +31,9 @@ public class InteractableObject : MonoBehaviour
     public DialogManager dialogManager;
     [Header("Use Trigger Events")]
     public Boolean gameManagerTrigger;
+    #if UNITY_EDITOR
     [EventList("Use Workbench", "Exit Workbench", "Generator Start")]
+    #endif
     public string gameManagerEventName;
     public InteractionAction nextActionAfterUsage;
     public Boolean animationTrigger;

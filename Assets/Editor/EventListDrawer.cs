@@ -29,14 +29,3 @@ public class EventListDrawer : PropertyDrawer
         }
     }
 }
-
-// Custom attribute for the EventList
-public class EventListAttribute : PropertyAttribute
-{
-    public readonly string[] eventNames;
-
-    public EventListAttribute(params string[] events)
-    {
-        this.eventNames = events;
-    }
-}
