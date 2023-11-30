@@ -118,7 +118,7 @@ namespace Doublsb.Dialog
 
             state = State.Deactivate;
 
-            if (_current_Data.Callback != null)
+            if (_current_Data != null && _current_Data.Callback != null)
             {
                 _current_Data.Callback.Invoke();
                 _current_Data.Callback = null;

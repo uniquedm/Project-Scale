@@ -87,6 +87,7 @@ public class Timeloop : MonoBehaviour
     IEnumerator spawnPlayer(float spawnTimeInSeconds)
     {
         yield return new WaitForSeconds(spawnTimeInSeconds);
+        dialogManager.Hide();
         DialogInputData data = respawnDialogs[respawnCount < respawnDialogs.Count ? respawnCount : respawnDialogs.Count - 1];
         DialogData dialogData = new DialogData(data.GetFormattedMessage(), data.character, null, data.skippable);
         dialogManager.Show(dialogData);

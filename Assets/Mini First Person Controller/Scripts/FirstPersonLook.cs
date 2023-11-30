@@ -1,7 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using Google.MaterialDesign.Icons;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+
+[System.Serializable]
+
+public struct InteractionActionUI
+{
+    public InteractionAction action;
+    public Sprite icon;
+    public string materialIcon;
+}
 
 public class FirstPersonLook : MonoBehaviour
 {
@@ -16,10 +27,11 @@ public class FirstPersonLook : MonoBehaviour
     Quaternion initialCharacterRotation;
 
     [Header("Interaction")]
-    public GameObject interactionUI;
+    public GameObject playerUI;
     public TextMeshProUGUI interactionText;
+    public MaterialIcon interactionIcon;
     public int interactionLayer;
-    public List<string> actions;
+    public List<InteractionActionUI> actionUI;
 
     public float Sensitivity { get => sensitivity; set => sensitivity = value; }
 
@@ -57,6 +69,12 @@ public class FirstPersonLook : MonoBehaviour
 
     private void InteractionRayCast()
     {
+        if (Inventory.Instance.Open())
+        {
+            playerUI.SetActive(false);
+            return;
+        }
+
         int layerMask = 1 << interactionLayer;
         RaycastHit hit;
         Camera camera = GetComponent<Camera>();
@@ -64,26 +82,34 @@ public class FirstPersonLook : MonoBehaviour
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
             Debug.DrawRay(transform.position, camera.transform.forward * hit.distance, Color.green);
-            if (hit.distance < 2 && actions.Contains(hit.collider.tag))
+            InteractableObject interactableObject = hit.collider.GetComponent<InteractableObject>();
+            if (hit.distance < 2 && interactableObject!=null)
             {
-                interactionUI.SetActive(true);
-                interactionText.text = hit.collider.tag;
-                if (Input.GetKeyDown(KeyCode.E)) {
-                    InteractableObject interactableObject = hit.collider.GetComponent<InteractableObject>();
-                    if (interactableObject != null) {
-                        interactableObject.Interaction();
+                foreach (InteractionActionUI actionElement in actionUI)
+                {
+                    if (interactableObject.interactionAction != actionElement.action)
+                    {
+                        continue;
                     }
+                    interactionIcon.iconUnicode = actionElement.materialIcon;
+                    break;
+
+                }
+                playerUI.SetActive(true);
+                interactionText.text = interactableObject.interactionAction.ToString();
+                if (Input.GetKeyDown(KeyCode.E)) {
+                   interactableObject.Interaction();
                 }
             }
             else
             {
-                interactionUI.SetActive(false);
+                playerUI.SetActive(false);
             }
         }
         else
         {
             Debug.DrawRay(transform.position, camera.transform.forward * hit.distance, Color.red);
-            interactionUI.SetActive(false);
+            playerUI.SetActive(false);
         }
     }
 }

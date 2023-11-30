@@ -77,14 +77,19 @@ public class Inventory : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        itemsData = new List<InventoryItem>();
+
     }
 
     // Update is called once per frame
     private void Update()
     {
+        
         if (Input.GetKeyDown(KeyCode.I)) {
             ToggleInventory(!inventoryUI.activeSelf);
+        }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            ToggleInventory(false);
         }
 
         if (inventoryUI.activeSelf)
@@ -113,6 +118,15 @@ public class Inventory : MonoBehaviour
 
     public void ToggleInventory(bool toggle, int index = 0)
     {
+        if (toggle && itemsData.Count == 0)
+        {
+            ToggleInventory(false, index);
+            return;
+        }
+        if (!toggle)
+        {
+            StopAllCoroutines();
+        }
         inventoryUI.SetActive(toggle);
         inventoryCamera.SetActive(toggle);
         Behaviour behaviour = this.GetComponent<FirstPersonMovement>();
@@ -135,6 +149,7 @@ public class Inventory : MonoBehaviour
             itemsData[index].item.transform.localPosition = Vector3.zero;
             itemsData[index].item.tag = "Untagged";
             itemsData[index].item.layer = focusedLayer;
+            itemsData[index].item.GetComponent<BoxCollider>().enabled = false;
             currentItem = itemsData[index].item;
             InteractableObject interactableObject = itemsData[index].item.GetComponent<InteractableObject>();
             itemNameUIText.text = interactableObject.itemName;
@@ -149,5 +164,43 @@ public class Inventory : MonoBehaviour
                 }
             }
         }
+    }
+
+    internal void CheckInventory(InteractableObject interactableObject)
+    {
+        ToggleInventory(true);
+        StartCoroutine(CheckItemSelection(interactableObject));
+    }
+
+    private IEnumerator CheckItemSelection(InteractableObject interactableObject)
+    {
+        bool itemMatched = false;
+        // Continue checking until the item names match
+        while (!itemMatched)
+        {
+            // Wait for a left mouse click
+            while (!Input.GetMouseButtonDown(0))
+            {
+                yield return null;
+            }
+            Debug.Log("Checking!");
+            Debug.Log(itemsData[currentIndex].itemName + " -> " + interactableObject.itemRequired);
+            // Mouse click detected, perform your logic
+            if (itemsData[currentIndex].itemName != interactableObject.itemRequired)
+            {
+                yield return null;
+            }
+            else
+            {
+                interactableObject.ItemsFound();
+                ToggleInventory(false);
+                itemMatched = true; // Set the flag to exit the loop
+            }
+        }
+    }
+
+    internal bool Open()
+    {
+        return this.inventoryUI.activeSelf;
     }
 }
