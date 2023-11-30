@@ -77,7 +77,7 @@ public class Inventory : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        itemsData = new List<InventoryItem>();
     }
 
     // Update is called once per frame
@@ -168,8 +168,11 @@ public class Inventory : MonoBehaviour
 
     internal void CheckInventory(InteractableObject interactableObject)
     {
-        ToggleInventory(true);
-        StartCoroutine(CheckItemSelection(interactableObject));
+        if (itemsData.Count > 0)
+        {
+            ToggleInventory(true);
+            StartCoroutine(CheckItemSelection(interactableObject));
+        }
     }
 
     private IEnumerator CheckItemSelection(InteractableObject interactableObject)
@@ -192,6 +195,7 @@ public class Inventory : MonoBehaviour
             }
             else
             {
+                itemsData.Remove(itemsData[currentIndex]);
                 interactableObject.ItemsFound();
                 ToggleInventory(false);
                 itemMatched = true; // Set the flag to exit the loop

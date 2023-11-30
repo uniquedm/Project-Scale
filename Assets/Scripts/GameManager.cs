@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UI.ThreeDimensional;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
@@ -63,6 +64,10 @@ public class GameManager : MonoBehaviour
     }
 
     // Your GameManager methods and properties go here
+    public HashSet<string> actionsDone;
+    [Header("Generator Events")]
+    public List<GameObjectToggleEvent> generatorGameEvents;
+    public List<BehaviourToggleEvent> generatorBehaviours;
     [Header("Workbench Inventory")]
     public List<UIObject3D> inventorySlots;
     [Header("Workbench Events")]
@@ -77,7 +82,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        actionsDone = new HashSet<string>();
     }
 
     // Update is called once per frame
@@ -96,6 +101,9 @@ public class GameManager : MonoBehaviour
             case "Exit Workbench":
                 WorkbenchUnload();
                 break;
+            case "Generator Start":
+                GeneratorStart();
+                break;
             case "Enable Player Movement":
                 PlayerCanMove(true);
                 break;
@@ -111,6 +119,19 @@ public class GameManager : MonoBehaviour
             default:
                 Debug.LogWarning($"Event '{eventName}' not handled.");
                 break;
+        }
+    }
+
+    private void GeneratorStart()
+    {
+        actionsDone.Add("GeneratorPowered");
+        foreach (GameObjectToggleEvent toggleEvent in generatorGameEvents)
+        {
+            toggleEvent.gameObject.SetActive(toggleEvent.active);
+        }
+        foreach (BehaviourToggleEvent generatorBehaviors in generatorBehaviours)
+        {
+            generatorBehaviors.behaviour.enabled = generatorBehaviors.active;
         }
     }
 
@@ -134,7 +155,6 @@ public class GameManager : MonoBehaviour
     {
         foreach (BehaviourToggleEvent movementBehaviour in playerMovementBehaviours)
         {
-            Debug.Log((canMove ? "Enabling" : "Disabling") + movementBehaviour.eventName);
             movementBehaviour.behaviour.enabled = canMove;
         }
     }

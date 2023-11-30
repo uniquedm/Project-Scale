@@ -29,13 +29,18 @@ public class InteractableObject : MonoBehaviour
     public DialogInputData[] dialogs;
     public DialogInputData[] inspectDialogs;
     public DialogManager dialogManager;
-    [Header("Game Manager Event")]
-    [EventList("Use Workbench", "Exit Workbench")]
-    public string triggerEvent;
+    [Header("Use Trigger Events")]
+    public Boolean gameManagerTrigger;
+    [EventList("Use Workbench", "Exit Workbench", "Generator Start")]
+    public string gameManagerEventName;
     public InteractionAction nextActionAfterUsage;
-    [Header("Item Required")]
+    public Boolean animationTrigger;
+    public string animationTriggerName;
+    [Header("Item/Action Required")]
     public InteractionAction nextActionAfterCompletion;
     public string itemRequired;
+    public Boolean actionBased;
+    public string actionName;
     public List<GameObjectToggleEvent> completionToggles;
     public List<BehaviourToggleEvent> completionBehaviors;
     // Start is called before the first frame update
@@ -62,8 +67,7 @@ public class InteractableObject : MonoBehaviour
                 ShowDialogs(dialogs);
                 break;
             case InteractionAction.Use:
-                GameManager.Instance.TriggerEvent(triggerEvent);
-                interactionAction = nextActionAfterUsage;
+                Use();
                 break;
             case InteractionAction.Inspect:
                 ItemsRequiredForNextAction();
@@ -74,6 +78,20 @@ public class InteractableObject : MonoBehaviour
         }
     }
 
+    private void Use()
+    {
+        if (gameManagerTrigger)
+        {
+            GameManager.Instance.TriggerEvent(gameManagerEventName);
+        }
+        Animator animator = GetComponent<Animator>();
+        if (animationTrigger && animator != null)
+        {
+            animator.SetTrigger(animationTriggerName);
+        }
+        interactionAction = nextActionAfterUsage;
+    }
+
     private void ItemUsage()
     {
         throw new NotImplementedException();
@@ -81,16 +99,36 @@ public class InteractableObject : MonoBehaviour
 
     private void ItemsRequiredForNextAction()
     {
-        Inventory.Instance.CheckInventory(this);
-        if (!Inventory.Instance.Open())
+        if (actionBased)
         {
-            ShowDialogs(inspectDialogs);
+            if (GameManager.Instance.actionsDone.Contains(actionName))
+            {
+                this.ItemsFound();
+                return;
+            }
         }
+        else
+        {
+            Inventory.Instance.CheckInventory(this);
+            if (Inventory.Instance.Open())
+            {
+                return;
+            }
+        }
+        ShowDialogs(inspectDialogs);
     }
 
     public void ItemsFound()
     {
         interactionAction = nextActionAfterCompletion;
+        foreach (GameObjectToggleEvent toggleEvent in completionToggles)
+        {
+            toggleEvent.gameObject.SetActive(toggleEvent.active);
+        }
+        foreach (BehaviourToggleEvent toggleBehaviors in completionBehaviors)
+        {
+            toggleBehaviors.behaviour.enabled = toggleBehaviors.active;
+        }
     }
 
     private void ShowDialogs(DialogInputData[] dialogs)

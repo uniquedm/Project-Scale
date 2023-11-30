@@ -82,7 +82,17 @@ public class FirstPersonLook : MonoBehaviour
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
             Debug.DrawRay(transform.position, camera.transform.forward * hit.distance, Color.green);
-            InteractableObject interactableObject = hit.collider.GetComponent<InteractableObject>();
+            InteractableObject[] interactableBehaviors = hit.collider.GetComponents<InteractableObject>();
+            InteractableObject interactableObject = interactableBehaviors[0];
+            foreach (InteractableObject behavior in interactableBehaviors)
+            {
+                if (behavior.isActiveAndEnabled)
+                {
+                    interactableObject = behavior;
+                    break;
+                }
+            }
+            
             if (hit.distance < 2 && interactableObject!=null)
             {
                 foreach (InteractionActionUI actionElement in actionUI)
