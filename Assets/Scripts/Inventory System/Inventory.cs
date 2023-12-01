@@ -73,18 +73,34 @@ public class Inventory : MonoBehaviour
     public TextMeshProUGUI itemDescriptionUIText;
     [Header("Inventory Data")]
     public List<InventoryItem> itemsData;
+    [Header("Inventory SFX")]
+    private AudioSource audioSource;
+    public AudioClip inventoryOpenSFX;
+    public AudioClip inventoryCloseSFX;
+    public AudioClip scrollSFX;
+    public AudioClip itemUseSFX;
+
+    private void PlaySFX(AudioClip sfxClip)
+    {
+        if (audioSource == null || sfxClip == null)
+        {
+            return;
+        }
+        audioSource.PlayOneShot(sfxClip);
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         itemsData = new List<InventoryItem>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     private void Update()
     {
         
-        if (Input.GetKeyDown(KeyCode.I)) {
+        if (Input.GetMouseButtonDown(1)) {
             ToggleInventory(!inventoryUI.activeSelf);
         }
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -98,10 +114,12 @@ public class Inventory : MonoBehaviour
 
             if (scrollInput > 0f) // Scroll Up
             {
+                PlaySFX(scrollSFX);
                 ToggleInventory(inventoryUI.activeSelf, currentIndex + 1);
             }
             else if (scrollInput < 0f) // Scroll Down
             {
+                PlaySFX(scrollSFX);
                 ToggleInventory(inventoryUI.activeSelf, currentIndex - 1);
             }
         }

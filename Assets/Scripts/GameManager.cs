@@ -79,6 +79,9 @@ public class GameManager : MonoBehaviour
     public List<GameObjectToggleEvent> startGameEvents;
     [Header("Clear Scene Events")]
     public List<GameObjectToggleEvent> clearSceneEvents;
+    [Header("Avalanche Events")]
+    public List<GameObjectToggleEvent> avalancheGameEvents;
+    public List<BehaviourToggleEvent> avalancheBehaviours;
 
     // Start is called before the first frame update
     void Start()
@@ -117,9 +120,31 @@ public class GameManager : MonoBehaviour
             case "Clear Scene":
                 ClearScene();
                 break;
+            case "Avalanche":
+                Avalanche();
+                break;
             default:
                 Debug.LogWarning($"Event '{eventName}' not handled.");
                 break;
+        }
+    }
+
+    private void Avalanche()
+    {
+        PlayerCanMove(false);
+        actionsDone.Add("Avalanche");
+        foreach (GameObjectToggleEvent toggleEvent in avalancheGameEvents)
+        {
+            toggleEvent.gameObject.SetActive(toggleEvent.active);
+        }
+        foreach (BehaviourToggleEvent avalancheBehaviors in avalancheBehaviours)
+        {
+            avalancheBehaviors.behaviour.enabled = avalancheBehaviors.active;
+        }
+        Timeloop timeloop = GetComponent<Timeloop>();
+        if (timeloop != null)
+        {
+            timeloop.TriggerTimeloop();
         }
     }
 
@@ -152,7 +177,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void PlayerCanMove(bool canMove)
+    public void PlayerCanMove(bool canMove)
     {
         foreach (BehaviourToggleEvent movementBehaviour in playerMovementBehaviours)
         {

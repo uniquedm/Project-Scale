@@ -87,6 +87,14 @@ namespace Doublsb.Dialog
             _textingRoutine = StartCoroutine(Activate());
         }
 
+        public void Update()
+        {
+            if (Time.timeScale == 0 || Inventory.Instance.inventoryUI.activeSelf)
+            {
+                Hide();
+            }
+        }
+
         public void Show(List<DialogData> Data)
         {
             StartCoroutine(Activate_List(Data));

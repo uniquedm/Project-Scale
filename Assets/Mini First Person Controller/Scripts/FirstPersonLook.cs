@@ -37,6 +37,7 @@ public class FirstPersonLook : MonoBehaviour
     public MaterialIcon interactionIcon;
     public int interactionLayer;
     public List<InteractionActionUI> actionUI;
+    public GameObject inventoryPrompt;
 
     public float Sensitivity { get => sensitivity; set => sensitivity = value; }
 
@@ -70,6 +71,26 @@ public class FirstPersonLook : MonoBehaviour
         #region Interaction Raycaster
         InteractionRayCast();
         #endregion
+
+        if (Inventory.Instance.itemsData.Count > 0)
+        {
+            inventoryPrompt.SetActive(!Inventory.Instance.inventoryUI.activeSelf);
+        }
+    }
+
+    private void Update()
+    {
+        if (Time.timeScale == 0 || TimeScaleDevice.Instance.timescaleHeld)
+        {
+            playerCrosshair.enabled = false;
+            playerInteractionUI.SetActive(false);
+            inventoryPrompt.SetActive(false);
+        }
+    }
+
+    public void OnDisable()
+    {
+        playerCrosshair.enabled = false;
     }
 
     private void InteractionRayCast()

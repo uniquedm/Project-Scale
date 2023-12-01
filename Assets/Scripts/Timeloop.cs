@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public struct DialogInputData
@@ -23,6 +24,7 @@ public struct DialogInputData
 public class Timeloop : MonoBehaviour
 {
     [Header("Timer Details")]
+    public Boolean timebasedRestart;
     public float timeElapsed;
     [Range(10f, 300f)]
     public float loopLength = 60f;
@@ -38,12 +40,15 @@ public class Timeloop : MonoBehaviour
 
     [Header("Respawn Details")]
     public GameObject respawnPoint;
-    public String respawnSequence;
     private Boolean startRespawn;
-    private Animator animator;
-    public float spawnTime = 2f;
+    public float spawnTime = 5f;
     private int respawnCount = 0;
     public List<DialogInputData> respawnDialogs;
+    public Image fadeOverlay;
+    public float fadeInTime = 2f;
+    public float fadeOutTime = 2f;
+    public List<GameObjectToggleEvent> respawnGameEvents;
+    public List<BehaviourToggleEvent> respawnBehaviours;
 
     [Header("Misc")]
     public DialogManager dialogManager;
@@ -55,7 +60,6 @@ public class Timeloop : MonoBehaviour
         startTimeloop = false;
         startRespawn = false;
         timeElapsed = 0f;
-        animator = GetComponent<Animator>();
         originalCameraHeight = playerCamera.GetComponent<Transform>().localPosition.y;
         pauseMenu = GetComponent<PauseMenu>();
     }
@@ -65,23 +69,34 @@ public class Timeloop : MonoBehaviour
         if (startTimeloop) {
             timeElapsed += Time.deltaTime;
         }
-        if (timeElapsed > loopLength)
+        if (timebasedRestart && timeElapsed > loopLength)
         {
-            startTimeloop = false;
-            pauseMenu.enabled = false;
-            timeElapsed = 0;
-            animator.PlayInFixedTime(respawnSequence);
-            startRespawn = true;
-            StartCoroutine(spawnPlayer(spawnTime));
+            TriggerTimeloop();
         }
-        if (startRespawn) {
-            Transform cameraTransform = playerCamera.GetComponent<Transform>();
-            cameraTransform.localPosition = new Vector3(
-                cameraTransform.localPosition.x,
-                Mathf.Lerp(cameraTransform.localPosition.y, playerFalldownHeight, cameraLerpSpeed * Time.deltaTime),
-                cameraTransform.localPosition.z
-            );
+        if (startRespawn)
+        {
+            RespawnStart();
         }
+    }
+
+    public void TriggerTimeloop()
+    {
+        startTimeloop = false;
+        pauseMenu.enabled = false;
+        timeElapsed = 0;
+        startRespawn = true;
+        StartCoroutine(spawnPlayer(spawnTime));
+        StartCoroutine(FadeInOut());
+    }
+
+    private void RespawnStart()
+    {
+        Transform cameraTransform = playerCamera.GetComponent<Transform>();
+        cameraTransform.localPosition = new Vector3(
+            cameraTransform.localPosition.x,
+            Mathf.Lerp(cameraTransform.localPosition.y, playerFalldownHeight, cameraLerpSpeed * Time.deltaTime),
+            cameraTransform.localPosition.z
+        );
     }
 
     IEnumerator spawnPlayer(float spawnTimeInSeconds)
@@ -104,5 +119,58 @@ public class Timeloop : MonoBehaviour
         );
         cameraTransform.localRotation = Quaternion.identity;
         respawnCount++;
+        GameManager.Instance.PlayerCanMove(true);
+        foreach (GameObjectToggleEvent toggleEvent in respawnGameEvents)
+        {
+            toggleEvent.gameObject.SetActive(toggleEvent.active);
+        }
+        foreach (BehaviourToggleEvent behaviour in respawnBehaviours)
+        {
+            behaviour.behaviour.enabled = behaviour.active;
+        }
+    }
+
+    IEnumerator FadeInOut()
+    {
+        // Fade in
+        yield return Fade(fadeOverlay, 1f, fadeInTime);
+
+        // Wait for a moment before fading out (you can adjust this time)
+        yield return new WaitForSeconds(1f);
+
+        // Fade out
+        yield return Fade(fadeOverlay, 0f, fadeOutTime);
+
+        // You can repeat the process or perform other actions here
+    }
+
+    IEnumerator Fade(Image image, float targetAlpha, float fadeTime)
+    {
+        // Store the original alpha value
+        float startAlpha = image.color.a;
+
+        // Calculate the rate of change for the alpha value
+        float rate = 1.0f / fadeTime;
+
+        // Keep track of time passed
+        float timePassed = 0f;
+
+        while (timePassed < 1.0f)
+        {
+            // Interpolate the alpha value over time
+            float alpha = Mathf.Lerp(startAlpha, targetAlpha, timePassed);
+
+            // Update the image's color
+            image.color = new Color(image.color.r, image.color.g, image.color.b, alpha);
+
+            // Increment the time passed based on the frame rate
+            timePassed += Time.deltaTime * rate;
+
+            // Wait for the next frame
+            yield return null;
+        }
+
+        // Ensure the final alpha value is set
+        image.color = new Color(image.color.r, image.color.g, image.color.b, targetAlpha);
     }
 }
