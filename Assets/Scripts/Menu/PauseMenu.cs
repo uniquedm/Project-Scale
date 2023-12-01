@@ -55,7 +55,7 @@ public class PauseMenu : MonoBehaviour
         TogglePause(false);
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.Confined;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
     }
 
     public void QuitGame()

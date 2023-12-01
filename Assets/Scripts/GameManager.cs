@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UI.ThreeDimensional;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public struct GameObjectToggleEvent
@@ -186,20 +187,37 @@ public class GameManager : MonoBehaviour
     private void WorkbenchLoadSlots()
     {
         List<InventoryItem> itemsData = Inventory.Instance.ItemsData;
+        HashSet<int> slotsUsed = new HashSet<int>();
         foreach (InventoryItem inventoryItem in itemsData)
         {
             int itemSlot = inventoryItem.slot;
-            Debug.Log(inventoryItem.item + " will be assigned to " + itemSlot.ToString());
             if (itemSlot == -1)
             {
                 continue;
             }
-            Debug.Log("Inventory has " + inventorySlots.Count.ToString() + "Slots");
             if (inventorySlots.Count >= itemSlot)
             {
                 inventorySlots[itemSlot].ObjectPrefab = inventoryItem.prefab.transform;
-                Debug.Log(inventoryItem.item + " is assigned to " + itemSlot.ToString());
+                slotsUsed.Add(itemSlot);
             }
+        }
+        for (int i = 0; i < inventorySlots.Count; i++)
+        {
+            UIObject3DImage renderImage = inventorySlots[i].GetComponent<UIObject3DImage>();
+            if (slotsUsed.Contains(i))
+            {
+                if (renderImage != null)
+                {
+                    renderImage.enabled = true;
+                }
+                continue;
+            }
+
+            if (renderImage != null)
+            {
+                renderImage.enabled = false;
+            }
+
         }
     }
 }

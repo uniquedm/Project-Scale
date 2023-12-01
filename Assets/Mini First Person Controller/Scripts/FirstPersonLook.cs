@@ -27,7 +27,12 @@ public class FirstPersonLook : MonoBehaviour
     Quaternion initialCharacterRotation;
 
     [Header("Interaction")]
-    public GameObject playerUI;
+    public MaterialIcon playerCrosshair;
+    public string interactableCrosshair = "F230";
+    public string normalCrosshair = "E3C2";
+    public Color normalColor = Color.white;
+    public Color interactableColor = Color.grey;
+    public GameObject playerInteractionUI;
     public TextMeshProUGUI interactionText;
     public MaterialIcon interactionIcon;
     public int interactionLayer;
@@ -71,7 +76,8 @@ public class FirstPersonLook : MonoBehaviour
     {
         if (Inventory.Instance.Open())
         {
-            playerUI.SetActive(false);
+            playerCrosshair.enabled = false;
+            playerInteractionUI.SetActive(false);
             return;
         }
 
@@ -105,7 +111,8 @@ public class FirstPersonLook : MonoBehaviour
                     break;
 
                 }
-                playerUI.SetActive(true);
+                playerCrosshair.enabled = false;
+                playerInteractionUI.SetActive(true);
                 interactionText.text = interactableObject.interactionAction.ToString();
                 if (Input.GetKeyDown(KeyCode.E)) {
                    interactableObject.Interaction();
@@ -113,13 +120,23 @@ public class FirstPersonLook : MonoBehaviour
             }
             else
             {
-                playerUI.SetActive(false);
+                ToggleInteractiveCrosshair(true);
+                playerCrosshair.enabled = true;
+                playerInteractionUI.SetActive(false);
             }
         }
         else
         {
+            ToggleInteractiveCrosshair(false);
             Debug.DrawRay(transform.position, camera.transform.forward * hit.distance, Color.red);
-            playerUI.SetActive(false);
+            playerCrosshair.enabled = true;
+            playerInteractionUI.SetActive(false);
         }
+    }
+
+    private void ToggleInteractiveCrosshair(bool isActive)
+    {
+        playerCrosshair.iconUnicode = isActive ? interactableCrosshair : normalCrosshair;
+        playerCrosshair.color = isActive ? interactableColor : normalColor;
     }
 }
