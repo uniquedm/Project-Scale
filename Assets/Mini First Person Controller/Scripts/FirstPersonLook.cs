@@ -68,10 +68,6 @@ public class FirstPersonLook : MonoBehaviour
         character.localRotation = initialCharacterRotation * Quaternion.AngleAxis(velocity.x, Vector3.up);
         #endregion
 
-        #region Interaction Raycaster
-        InteractionRayCast();
-        #endregion
-
         if (Inventory.Instance.itemsData.Count > 0)
         {
             inventoryPrompt.SetActive(!Inventory.Instance.inventoryUI.activeSelf);
@@ -80,6 +76,10 @@ public class FirstPersonLook : MonoBehaviour
 
     private void Update()
     {
+        #region Interaction Raycaster
+        InteractionRayCast();
+        #endregion
+
         if (Time.timeScale == 0 || TimeScaleDevice.Instance.timescaleHeld)
         {
             playerCrosshair.enabled = false;

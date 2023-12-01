@@ -1,5 +1,6 @@
 using Doublsb.Dialog;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UI.ThreeDimensional;
@@ -89,6 +90,10 @@ public class GameManager : MonoBehaviour
     [Header("Timescale Fix")]
     public int componentsRequiredForFixing = 3;
     public UnityEvent OnTimescaleFix;
+    [Header("End Scene")]
+    public string sceneName;
+    public Image overlayBeforeLoading;
+    public float fadeDuration = 3f;
 
     // Start is called before the first frame update
     void Start()
@@ -146,7 +151,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("End Scene!");
         PlayerCanMove(false);
-        //SceneManager.LoadSceneAsync(0);
+        StartCoroutine(GameEnding());
     }
 
     private void Avalanche()
@@ -270,6 +275,7 @@ public class GameManager : MonoBehaviour
     private void TimescaleFixed()
     {
         Debug.Log("Timescale Fixed!");
+        Inventory.Instance.itemsData.Clear();
         actionsDone.Add("Timescale Fixed");
         TriggerEvent("Exit Workbench");
         OnTimescaleFix.Invoke();
@@ -289,6 +295,45 @@ public class GameManager : MonoBehaviour
         if (componentsRequiredForFixing == 0)
         {
             TriggerEvent("Timescale Fixed");
+        }
+    }
+
+    IEnumerator GameEnding()
+    {
+        // Ensure the image is not null
+        if (overlayBeforeLoading == null)
+        {
+            Debug.LogError("Image to fade is not assigned!");
+            yield break;
+        }
+
+        // Set the initial color of the image
+        Color currentColor = overlayBeforeLoading.color;
+
+        // Loop until the fade is complete
+        float elapsedTime = 0f;
+        while (elapsedTime < fadeDuration)
+        {
+            // Calculate the alpha value based on the elapsed time
+            float alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeDuration);
+
+            // Set the new color with the updated alpha value
+            overlayBeforeLoading.color = new Color(currentColor.r, currentColor.g, currentColor.b, alpha);
+
+            // Wait for the next frame
+            yield return null;
+
+            // Update the elapsed time
+            elapsedTime += Time.deltaTime;
+        }
+
+        // Ensure the final color is fully opaque
+        overlayBeforeLoading.color = new Color(currentColor.r, currentColor.g, currentColor.b, 1f);
+
+        // Load the next scene
+        if (!string.IsNullOrEmpty(sceneName))
+        {
+            SceneManager.LoadScene(sceneName);
         }
     }
 }

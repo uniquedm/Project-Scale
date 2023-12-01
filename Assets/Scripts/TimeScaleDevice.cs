@@ -55,6 +55,7 @@ public class TimeScaleDevice : MonoBehaviour
     public List<BehaviourToggleEvent> behavioursAfterReversal;
     public Boolean disableTimeScale = false;
     private bool isBeingReversedCoroutineRunning = false;
+    public GameObject eventAvailableUI;
 
 
     // Ensure the instance is not destroyed when reloading the scene
@@ -142,7 +143,9 @@ public class TimeScaleDevice : MonoBehaviour
 
     private Boolean CanReverseTime()
     {
-        return reverseEventAnimator != null && triggerEvent != null;
+        Boolean canReverse = reverseEventAnimator != null && triggerEvent != null;
+        eventAvailableUI.SetActive(canReverse);
+        return canReverse;
     }
 
     private void PlaySFX(AudioClip clip)

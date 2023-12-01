@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MountainGroup.unity
-    guid: ab78e1ede46ec064dba2a364c4f4efa8
+    path: Assets/Scenes/MainGame.unity
+    guid: b99e91f8b54bf854ab3dfeeaceec71e8
+  - enabled: 1
+    path: Assets/Scenes/GameEnding.unity
+    guid: af67eae33024f1c44af76ed62d2db7ad
   m_configObjects: {}
