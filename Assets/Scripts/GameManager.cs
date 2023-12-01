@@ -1,8 +1,12 @@
+using Doublsb.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UI.ThreeDimensional;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 [System.Serializable]
@@ -82,6 +86,9 @@ public class GameManager : MonoBehaviour
     [Header("Avalanche Events")]
     public List<GameObjectToggleEvent> avalancheGameEvents;
     public List<BehaviourToggleEvent> avalancheBehaviours;
+    [Header("Timescale Fix")]
+    public int componentsRequiredForFixing = 3;
+    public UnityEvent OnTimescaleFix;
 
     // Start is called before the first frame update
     void Start()
@@ -123,10 +130,23 @@ public class GameManager : MonoBehaviour
             case "Avalanche":
                 Avalanche();
                 break;
+            case "Timescale Fixed":
+                TimescaleFixed();
+                break;
+            case "Game Over":
+                EndScene();
+                break;
             default:
                 Debug.LogWarning($"Event '{eventName}' not handled.");
                 break;
         }
+    }
+
+    private void EndScene()
+    {
+        Debug.Log("End Scene!");
+        PlayerCanMove(false);
+        //SceneManager.LoadSceneAsync(0);
     }
 
     private void Avalanche()
@@ -146,6 +166,7 @@ public class GameManager : MonoBehaviour
         {
             timeloop.TriggerTimeloop();
         }
+        actionsDone.Add("TimescalePickedUp");
     }
 
     private void GeneratorStart()
@@ -220,7 +241,7 @@ public class GameManager : MonoBehaviour
             {
                 continue;
             }
-            if (inventorySlots.Count >= itemSlot)
+            if (itemSlot < inventorySlots.Count)
             {
                 inventorySlots[itemSlot].ObjectPrefab = inventoryItem.prefab.transform;
                 slotsUsed.Add(itemSlot);
@@ -243,6 +264,31 @@ public class GameManager : MonoBehaviour
                 renderImage.enabled = false;
             }
 
+        }
+    }
+
+    private void TimescaleFixed()
+    {
+        Debug.Log("Timescale Fixed!");
+        actionsDone.Add("Timescale Fixed");
+        TriggerEvent("Exit Workbench");
+        OnTimescaleFix.Invoke();
+    }
+
+    public void WorkbenchInteractions(string message)
+    {
+        DialogManager dialogManager = FindAnyObjectByType<DialogManager>();
+        dialogManager.Hide();
+        DialogData dialogData = new DialogData(message, "Player", null, true);
+        dialogManager.Show(dialogData);
+    }
+
+    public void TimescaleComponentFixed()
+    {
+        componentsRequiredForFixing--;
+        if (componentsRequiredForFixing == 0)
+        {
+            TriggerEvent("Timescale Fixed");
         }
     }
 }

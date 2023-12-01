@@ -32,7 +32,7 @@ public class InteractableObject : MonoBehaviour
     [Header("Use Trigger Events")]
     public Boolean gameManagerTrigger;
     #if UNITY_EDITOR
-    [EventList("Use Workbench", "Exit Workbench", "Generator Start")]
+    [EventList("Use Workbench", "Exit Workbench", "Generator Start", "Game Over")]
     #endif
     public string gameManagerEventName;
     public InteractionAction nextActionAfterUsage;
