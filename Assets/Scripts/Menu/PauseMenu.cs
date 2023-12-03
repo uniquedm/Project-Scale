@@ -10,6 +10,8 @@ public class PauseMenu : MonoBehaviour
     public GameObject pauseMenu;
     public GameObject mainMenu;
     public List<GameObject> otherMenus;
+    // Hotfix: For Workbench UI Issue with Pause Menu
+    public GameObject workbenchCamera;
     // Start is called before the first frame update
     void Start()
     {
@@ -29,7 +31,7 @@ public class PauseMenu : MonoBehaviour
     public void TogglePause(Boolean isPaused)
     {
         this.isPaused = isPaused;
-        if (!isPaused) {
+        if (!isPaused && !workbenchCamera.activeSelf) {
             // Lock the mouse cursor to the game screen.
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;

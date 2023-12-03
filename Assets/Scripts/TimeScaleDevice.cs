@@ -102,7 +102,7 @@ public class TimeScaleDevice : MonoBehaviour
             timescaleHeld = !timescaleHeld;
         }
         timescaleGameObject.SetActive(timescaleHeld);
-        if (timescaleHeld && Input.GetMouseButtonDown(0) && CanReverseTime())
+        if (CanReverseTime() && timescaleHeld && Input.GetMouseButtonDown(0))
         {
             isBeingReversedCoroutineRunning = true;
             StartCoroutine(ReverseTime());
