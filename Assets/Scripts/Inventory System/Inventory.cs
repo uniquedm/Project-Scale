@@ -62,10 +62,8 @@ public class Inventory : MonoBehaviour
 
     [Header("Inventory UI")]
     public GameObject inventoryUI;
+    public GameObject inventoryUIBlur;
     public GameObject inventoryCamera;
-    public Volume renderVolume;
-    public VolumeProfile inventoryProfile;
-    public VolumeProfile renderProfile;
     public GameObject itemPreviewLocation;
     public int focusedLayer;
     private GameObject currentItem;
@@ -148,10 +146,10 @@ public class Inventory : MonoBehaviour
             StopAllCoroutines();
         }
         inventoryUI.SetActive(toggle);
+        inventoryUIBlur.SetActive(toggle);
         inventoryCamera.SetActive(toggle);
         Behaviour behaviour = this.GetComponent<FirstPersonMovement>();
         behaviour.enabled = !toggle;
-        renderVolume.profile = toggle ? inventoryProfile : renderProfile;
         if (index < 0)
         {
             index = itemsData.Count - 1;
