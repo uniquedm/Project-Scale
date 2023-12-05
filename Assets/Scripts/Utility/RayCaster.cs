@@ -8,7 +8,8 @@ public class RayCaster {
     public Transform EndTransform;
     public Vector3 Direction;
     public float RayLength;
-    public int CurrentLayerMask = 0;
+    public int LineCastLayerMask = 0;
+    public LayerMask RayCastLayerMask = 0;
 
     public event Action<Collider> OnRayEnter;
     public event Action<Collider> OnRayStay;
@@ -18,13 +19,15 @@ public class RayCaster {
     RaycastHit hit = new RaycastHit();
 
     public bool CastRay() {
-        Physics.Raycast(StartTransform.position, Direction, out hit, RayLength, CurrentLayerMask);
+        Ray ray = new Ray(StartTransform.position, Direction);
+        Physics.Raycast(ray, out hit, RayLength, RayCastLayerMask);
+        Debug.DrawRay(StartTransform.position, Direction * hit.distance, Color.red);
         ProcessCollision(hit.collider);
         return hit.collider != null ? true : false;
     }
 
     public bool CastLine() {
-        Physics.Linecast(StartTransform.position, EndTransform.position, out hit, CurrentLayerMask);
+        Physics.Linecast(StartTransform.position, EndTransform.position, out hit, LineCastLayerMask);
         ProcessCollision(hit.collider);
         return hit.collider != null ? true : false;
     }

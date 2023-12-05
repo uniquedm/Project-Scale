@@ -22,13 +22,39 @@ public class InteractionRaycast : MonoBehaviour
     public GameObject inventoryPrompt;
 
     [Header("InteractionRayCaster")]
-    private RayCaster rayCaster;
+    private RayCaster interactionRayCaster;
+
+    private Camera playerCamera;
+
+    private void Awake()
+    {
+        playerCamera = GetComponent<Camera>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        interactionRayCaster = new RayCaster();
+        interactionRayCaster.OnRayEnter += InteractionOnEnter;
+        interactionRayCaster.OnRayExit += InteractionOnExit;
+        interactionRayCaster.RayCastLayerMask = interactionLayerMask;
+        interactionRayCaster.RayLength = Mathf.Infinity;
+        interactionRayCaster.StartTransform = playerCamera.transform;
+        interactionRayCaster.Direction = playerCamera.transform.forward;
     }
+
+    void InteractionOnEnter(Collider collider)
+    {
+        Debug.Log("Entered Interaction!");
+        collider.gameObject.layer = interactionOutlineLayer;
+    }
+
+    void InteractionOnExit(Collider collider)
+    {
+        Debug.Log("Exited Interaction!");
+        collider.gameObject.layer = interactionLayer;
+    }
+
     public void OnDisable()
     {
         playerCrosshair.enabled = false;
@@ -45,6 +71,9 @@ public class InteractionRaycast : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        #region New Interaction Raycaster
+        InteractionRayCastTrigger();
+        #endregion
         #region Interaction Raycaster
         InteractionRayCast();
         #endregion
@@ -57,6 +86,13 @@ public class InteractionRaycast : MonoBehaviour
         }
     }
 
+    private void InteractionRayCastTrigger()
+    {
+        interactionRayCaster.StartTransform = playerCamera.transform;
+        interactionRayCaster.Direction = playerCamera.transform.forward;
+        interactionRayCaster.CastRay();
+    }
+
     private void InteractionRayCast()
     {
         if (Inventory.Instance.Open())
@@ -67,11 +103,10 @@ public class InteractionRaycast : MonoBehaviour
         }
 
         RaycastHit hit;
-        Camera camera = GetComponent<Camera>();
-        Ray ray = new Ray(camera.transform.position, camera.transform.forward);
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, interactionLayerMask))
         {
-            Debug.DrawRay(transform.position, camera.transform.forward * hit.distance, Color.green);
+            Debug.DrawRay(transform.position, playerCamera.transform.forward * hit.distance, Color.green);
             hit.collider.gameObject.layer = 12;
             InteractableObject[] interactableBehaviors = hit.collider.GetComponents<InteractableObject>();
             InteractableObject interactableObject = interactableBehaviors[0];
@@ -118,7 +153,7 @@ public class InteractionRaycast : MonoBehaviour
             {
                 hit.collider.gameObject.layer = 10;
             }
-            Debug.DrawRay(transform.position, camera.transform.forward * hit.distance, Color.red);
+            Debug.DrawRay(transform.position, playerCamera.transform.forward * hit.distance, Color.red);
             playerCrosshair.enabled = true;
             playerInteractionUI.SetActive(false);
         }
