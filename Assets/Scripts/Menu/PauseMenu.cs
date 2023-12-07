@@ -10,6 +10,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject pauseMenu;
     public GameObject mainMenu;
     public List<GameObject> otherMenus;
+    public GameObject backgroundBlur;
     // Hotfix: For Workbench UI Issue with Pause Menu
     public GameObject workbenchCamera;
     // Start is called before the first frame update
@@ -43,6 +44,7 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = isPaused ? 0.0f : 1.0f;
         pauseMenu.SetActive(isPaused);
         mainMenu.SetActive(isPaused);
+        backgroundBlur.SetActive(isPaused);
         if (otherMenus.Count > 0) {
             foreach (GameObject otherMenu in otherMenus)
             {

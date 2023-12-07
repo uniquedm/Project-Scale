@@ -2,7 +2,9 @@ using Google.MaterialDesign.Icons;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InteractionRaycast : MonoBehaviour
 {
@@ -118,7 +120,7 @@ public class InteractionRaycast : MonoBehaviour
                     break;
                 }
             }
-
+            Debug.Log(hit.distance);
             if (hit.distance < 2 && interactableObject != null)
             {
                 foreach (InteractionActionUI actionElement in actionUI)
