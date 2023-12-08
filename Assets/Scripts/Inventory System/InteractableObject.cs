@@ -2,6 +2,7 @@ using Doublsb.Dialog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -20,6 +21,8 @@ public class InteractableObject : MonoBehaviour
 {
     [Header("Interaction Details")]
     public InteractionAction interactionAction;
+    public GameObject interactionWorldUI;
+    public GameObject interactionWorldUIInstance;
     [Header("Inventory Details")]
     public string itemName;
     public string itemDescription;
@@ -161,5 +164,25 @@ public class InteractableObject : MonoBehaviour
                                                     this.prefab);
         inventory.ItemsData.Add(itemData);
         this.gameObject.SetActive(false);
+    }
+
+    public void InteractionUI(Boolean active)
+    {
+        if (interactionWorldUIInstance == null)
+        {
+            interactionWorldUIInstance = GameObject.Instantiate(interactionWorldUI, transform, true);
+            interactionWorldUIInstance.transform.localPosition = Vector3.zero;
+        }
+        TextMeshProUGUI interactionText = interactionWorldUIInstance.GetComponentInChildren<TextMeshProUGUI>();
+        if (interactionText != null)
+        {
+            interactionText.text = itemName;
+        }
+        interactionWorldUIInstance.SetActive(active);
+        if (active==false)
+        {
+            Destroy(interactionWorldUIInstance);
+            interactionWorldUIInstance = null;
+        }
     }
 }

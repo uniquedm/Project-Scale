@@ -206,7 +206,6 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
-        Notify("Game Started");
         foreach (GameObjectToggleEvent toggleEvent in startGameEvents)
         {
             toggleEvent.gameObject.SetActive(toggleEvent.active);
@@ -215,7 +214,6 @@ public class GameManager : MonoBehaviour
 
     public void PlayerCanMove(bool canMove)
     {
-        Notify("Player Can Move");
         foreach (BehaviourToggleEvent movementBehaviour in playerMovementBehaviours)
         {
             movementBehaviour.behaviour.enabled = canMove;
@@ -225,7 +223,6 @@ public class GameManager : MonoBehaviour
     // Example method for the "WorkbenchLoad" case
     private void WorkbenchLoad()
     {
-        Notify("Work bench loaded");
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         WorkbenchLoadSlots();
@@ -238,7 +235,6 @@ public class GameManager : MonoBehaviour
 
     private void WorkbenchUnload()
     {
-        Notify("Work bench exited");
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         foreach (GameObjectToggleEvent toggleEvent in workbenchGameEvents)
@@ -348,6 +344,12 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene(sceneName);
         }
+    }
+
+    [com.cyborgAssets.inspectorButtonPro.ProPlayButton]
+    public void TestNotification()
+    {
+        Notify("Testing");
     }
 
     public static void Notify(string message)

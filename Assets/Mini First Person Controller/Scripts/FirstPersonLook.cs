@@ -41,7 +41,7 @@ public class FirstPersonLook : MonoBehaviour
         initialCharacterRotation = character.localRotation;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (Time.timeScale == 0)
         {

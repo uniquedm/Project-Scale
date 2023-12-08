@@ -1,4 +1,5 @@
 using Google.MaterialDesign.Icons;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -25,7 +26,7 @@ public class InteractionRaycast : MonoBehaviour
 
     [Header("InteractionRayCaster")]
     private RayCaster interactionRayCaster;
-
+    public float interactionMaxDistance = 2f;
     private Camera playerCamera;
 
     private void Awake()
@@ -40,21 +41,21 @@ public class InteractionRaycast : MonoBehaviour
         interactionRayCaster.OnRayEnter += InteractionOnEnter;
         interactionRayCaster.OnRayExit += InteractionOnExit;
         interactionRayCaster.RayCastLayerMask = interactionLayerMask;
-        interactionRayCaster.RayLength = Mathf.Infinity;
+        interactionRayCaster.RayLength = interactionMaxDistance;
         interactionRayCaster.StartTransform = playerCamera.transform;
         interactionRayCaster.Direction = playerCamera.transform.forward;
     }
 
     void InteractionOnEnter(Collider collider)
     {
-        Debug.Log("Entered Interaction!");
         collider.gameObject.layer = interactionOutlineLayer;
+        InteractionUI(collider, true);
     }
 
     void InteractionOnExit(Collider collider)
     {
-        Debug.Log("Exited Interaction!");
         collider.gameObject.layer = interactionLayer;
+        InteractionUI(collider, false);
     }
 
     public void OnDisable()
@@ -109,22 +110,24 @@ public class InteractionRaycast : MonoBehaviour
 
         RaycastHit hit;
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, interactionLayerMask))
+        if (Physics.Raycast(ray, out hit, interactionMaxDistance, interactionLayerMask))
         {
             Debug.DrawRay(transform.position, playerCamera.transform.forward * hit.distance, Color.green);
-            hit.collider.gameObject.layer = 12;
             InteractableObject[] interactableBehaviors = hit.collider.GetComponents<InteractableObject>();
-            InteractableObject interactableObject = interactableBehaviors[0];
-            foreach (InteractableObject behavior in interactableBehaviors)
+            InteractableObject interactableObject = null;
+            if (interactableBehaviors != null && interactableBehaviors.Length > 0)
             {
-                if (behavior.isActiveAndEnabled)
+                interactableObject = interactableBehaviors[0];
+                foreach (InteractableObject behavior in interactableBehaviors)
                 {
-                    interactableObject = behavior;
-                    break;
+                    if (behavior.isActiveAndEnabled)
+                    {
+                        interactableObject = behavior;
+                        break;
+                    }
                 }
             }
-            Debug.Log(hit.distance);
-            if (hit.distance < 2 && interactableObject != null)
+            if (interactableObject != null)
             {
                 foreach (InteractionActionUI actionElement in actionUI)
                 {
@@ -154,10 +157,6 @@ public class InteractionRaycast : MonoBehaviour
         else
         {
             ToggleInteractiveCrosshair(false);
-            if (hit.collider != null)
-            {
-                hit.collider.gameObject.layer = 10;
-            }
             Debug.DrawRay(transform.position, playerCamera.transform.forward * hit.distance, Color.red);
             playerCrosshair.enabled = true;
             playerInteractionUI.SetActive(false);
@@ -168,5 +167,17 @@ public class InteractionRaycast : MonoBehaviour
     {
         playerCrosshair.iconUnicode = isActive ? interactableCrosshair : normalCrosshair;
         playerCrosshair.color = isActive ? interactableColor : normalColor;
+    }
+
+    private static void InteractionUI(Collider collider, Boolean isEnable)
+    {
+        InteractableObject[] interaction = collider.GetComponents<InteractableObject>();
+        foreach (InteractableObject interactableObject in interaction)
+        {
+            if (interactableObject.enabled)
+            {
+                interactableObject.InteractionUI(isEnable);
+            }
+        }
     }
 }
