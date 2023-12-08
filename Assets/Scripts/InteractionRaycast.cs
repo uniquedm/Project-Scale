@@ -59,7 +59,10 @@ public class InteractionRaycast : MonoBehaviour
 
     public void OnDisable()
     {
-        playerCrosshair.enabled = false;
+        if (playerCrosshair != null)
+        {
+            playerCrosshair.enabled = false;
+        }
     }
 
     private void FixedUpdate()

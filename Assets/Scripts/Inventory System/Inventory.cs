@@ -1,3 +1,4 @@
+using Doublsb.Dialog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -71,6 +72,7 @@ public class Inventory : MonoBehaviour
     private int currentIndex = 0;
     public TextMeshProUGUI itemNameUIText;
     public TextMeshProUGUI itemDescriptionUIText;
+    private DialogManager dialogManager;
     [Header("Inventory Data")]
     public List<InventoryItem> itemsData;
     [Header("Inventory SFX")]
@@ -92,6 +94,7 @@ public class Inventory : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        dialogManager = FindAnyObjectByType<DialogManager>();
         itemsData = new List<InventoryItem>();
         audioSource = GetComponent<AudioSource>();
     }
@@ -199,6 +202,7 @@ public class Inventory : MonoBehaviour
         // Continue checking until the item names match
         while (!itemMatched)
         {
+            Debug.Log("Running Coroutine!");
             // Wait for a left mouse click
             while (!Input.GetMouseButtonDown(0))
             {
@@ -209,6 +213,9 @@ public class Inventory : MonoBehaviour
             // Mouse click detected, perform your logic
             if (itemsData[currentIndex].itemName != interactableObject.itemRequired)
             {
+                dialogManager.Hide();
+                DialogData dialogData = new DialogData("I don't think it can be used here...", "Player", null, true);
+                dialogManager.Show(dialogData);
                 yield return null;
             }
             else

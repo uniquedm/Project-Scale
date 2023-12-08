@@ -55,7 +55,7 @@ public class TimeScaleDevice : MonoBehaviour
     public List<BehaviourToggleEvent> behavioursAfterReversal;
     public Boolean disableTimeScale = false;
     private bool isBeingReversedCoroutineRunning = false;
-    public GameObject eventAvailableUI;
+    public string timescaleEventNotificationText = "Timescale Event Available!";
 
 
     // Ensure the instance is not destroyed when reloading the scene
@@ -144,7 +144,10 @@ public class TimeScaleDevice : MonoBehaviour
     private Boolean CanReverseTime()
     {
         Boolean canReverse = reverseEventAnimator != null && triggerEvent != null;
-        eventAvailableUI.SetActive(canReverse);
+        if (canReverse)
+        {
+            GameManager.Notify(timescaleEventNotificationText);
+        }
         return canReverse;
     }
 

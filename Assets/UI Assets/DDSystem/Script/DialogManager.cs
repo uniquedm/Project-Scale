@@ -89,7 +89,7 @@ namespace Doublsb.Dialog
 
         public void Update()
         {
-            if (Time.timeScale == 0 || Inventory.Instance.inventoryUI.activeSelf)
+            if (Time.timeScale == 0)
             {
                 Hide();
             }

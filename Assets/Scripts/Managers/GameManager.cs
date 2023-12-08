@@ -1,8 +1,10 @@
 using Doublsb.Dialog;
+using Lean.Gui;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using TMPro;
 using UI.ThreeDimensional;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -67,6 +69,8 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject); // Destroy duplicate GameManager instances
         }
+        notificationUIStatic = notificationUI;
+        notificationTextStatic = notificationText;
     }
 
     // Your GameManager methods and properties go here
@@ -94,6 +98,11 @@ public class GameManager : MonoBehaviour
     public string sceneName;
     public Image overlayBeforeLoading;
     public float fadeDuration = 3f;
+    [Header("Notification Event")]
+    public LeanPulse notificationUI;
+    public TextMeshProUGUI notificationText;
+    public static LeanPulse notificationUIStatic;
+    public static TextMeshProUGUI notificationTextStatic;
 
     // Start is called before the first frame update
     void Start()
@@ -197,6 +206,7 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
+        Notify("Game Started");
         foreach (GameObjectToggleEvent toggleEvent in startGameEvents)
         {
             toggleEvent.gameObject.SetActive(toggleEvent.active);
@@ -205,6 +215,7 @@ public class GameManager : MonoBehaviour
 
     public void PlayerCanMove(bool canMove)
     {
+        Notify("Player Can Move");
         foreach (BehaviourToggleEvent movementBehaviour in playerMovementBehaviours)
         {
             movementBehaviour.behaviour.enabled = canMove;
@@ -214,6 +225,7 @@ public class GameManager : MonoBehaviour
     // Example method for the "WorkbenchLoad" case
     private void WorkbenchLoad()
     {
+        Notify("Work bench loaded");
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         WorkbenchLoadSlots();
@@ -226,6 +238,7 @@ public class GameManager : MonoBehaviour
 
     private void WorkbenchUnload()
     {
+        Notify("Work bench exited");
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         foreach (GameObjectToggleEvent toggleEvent in workbenchGameEvents)
@@ -335,5 +348,11 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene(sceneName);
         }
+    }
+
+    public static void Notify(string message)
+    {
+        notificationTextStatic.text = message;
+        notificationUIStatic.Pulse();
     }
 }
