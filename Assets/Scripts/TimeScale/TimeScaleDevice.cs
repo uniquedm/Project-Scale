@@ -121,6 +121,7 @@ public class TimeScaleDevice : MonoBehaviour
 
     private IEnumerator ReverseTime()
     {
+        GameManager.Instance.PlayerCanMove(false);
         PlaySFX(reverseSFX);
         mainCamera = Camera.main;
         Volume postProcessing = mainCamera.GetComponent<Volume>();
@@ -138,6 +139,7 @@ public class TimeScaleDevice : MonoBehaviour
         {
             toggleEvent.gameObject.SetActive(toggleEvent.active);
         }
+        GameManager.Instance.PlayerCanMove(true);
         isBeingReversedCoroutineRunning = false;
     }
 

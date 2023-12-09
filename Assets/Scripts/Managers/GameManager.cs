@@ -76,21 +76,21 @@ public class GameManager : MonoBehaviour
     // Your GameManager methods and properties go here
     public HashSet<string> actionsDone;
     [Header("Generator Events")]
-    public List<GameObjectToggleEvent> generatorGameEvents;
-    public List<BehaviourToggleEvent> generatorBehaviours;
+    public UnityEvent generatorEvents;
     [Header("Workbench Inventory")]
     public List<UIObject3D> inventorySlots;
     [Header("Workbench Events")]
     public List<GameObjectToggleEvent> workbenchGameEvents;
+    public UnityEvent workbenchEvents;
     [Header("Player Movement Behaviours")]
     public List<BehaviourToggleEvent> playerMovementBehaviours;
+    public UnityEvent playerMovementEvents;
     [Header("Start Game Events")]
-    public List<GameObjectToggleEvent> startGameEvents;
+    public UnityEvent startSceneEvents;
     [Header("Clear Scene Events")]
-    public List<GameObjectToggleEvent> clearSceneEvents;
+    public UnityEvent cleanUpSceneEvents;
     [Header("Avalanche Events")]
-    public List<GameObjectToggleEvent> avalancheGameEvents;
-    public List<BehaviourToggleEvent> avalancheBehaviours;
+    public UnityEvent avalancheEvents;
     [Header("Timescale Fix")]
     public int componentsRequiredForFixing = 3;
     public UnityEvent OnTimescaleFix;
@@ -160,15 +160,8 @@ public class GameManager : MonoBehaviour
     private void Avalanche()
     {
         PlayerCanMove(false);
+        avalancheEvents.Invoke();
         actionsDone.Add("Avalanche");
-        foreach (GameObjectToggleEvent toggleEvent in avalancheGameEvents)
-        {
-            toggleEvent.gameObject.SetActive(toggleEvent.active);
-        }
-        foreach (BehaviourToggleEvent avalancheBehaviors in avalancheBehaviours)
-        {
-            avalancheBehaviors.behaviour.enabled = avalancheBehaviors.active;
-        }
         Timeloop timeloop = GetComponent<Timeloop>();
         if (timeloop != null)
         {
@@ -180,30 +173,17 @@ public class GameManager : MonoBehaviour
     private void GeneratorStart()
     {
         actionsDone.Add("GeneratorPowered");
-        foreach (GameObjectToggleEvent toggleEvent in generatorGameEvents)
-        {
-            toggleEvent.gameObject.SetActive(toggleEvent.active);
-        }
-        foreach (BehaviourToggleEvent generatorBehaviors in generatorBehaviours)
-        {
-            generatorBehaviors.behaviour.enabled = generatorBehaviors.active;
-        }
+        generatorEvents.Invoke();
     }
 
     private void ClearScene()
     {
-        foreach (GameObjectToggleEvent toggleEvent in clearSceneEvents)
-        {
-            toggleEvent.gameObject.SetActive(toggleEvent.active);
-        }
+        cleanUpSceneEvents.Invoke();
     }
 
     private void StartGame()
     {
-        foreach (GameObjectToggleEvent toggleEvent in startGameEvents)
-        {
-            toggleEvent.gameObject.SetActive(toggleEvent.active);
-        }
+        startSceneEvents.Invoke();
     }
 
     public void PlayerCanMove(bool canMove)

@@ -214,7 +214,7 @@ public class Inventory : MonoBehaviour
             if (itemsData[currentIndex].itemName != interactableObject.itemRequired)
             {
                 dialogManager.Hide();
-                DialogData dialogData = new DialogData("I don't think it can be used here...", "Player", null, true);
+                DialogData dialogData = new DialogData("/color:#e84200/I don't think it can be used here.../close/", "Player", null, true);
                 dialogManager.Show(dialogData);
                 yield return null;
             }

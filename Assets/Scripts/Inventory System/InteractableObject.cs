@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -178,5 +179,11 @@ public class InteractableObject : MonoBehaviour
             Destroy(interactionWorldUIInstance);
             interactionWorldUIInstance = null;
         }
+    }
+
+    public void OnDisable()
+    {
+        Destroy(interactionWorldUIInstance);
+        interactionWorldUIInstance = null;
     }
 }
