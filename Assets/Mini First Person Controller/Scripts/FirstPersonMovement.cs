@@ -23,7 +23,7 @@ public class FirstPersonMovement : MonoBehaviour
         playerRigidbody = GetComponent<Rigidbody>();
     }
 
-    void FixedUpdate()
+    void Update()
     {
         // Update IsRunning from input.
         IsRunning = canRun && Input.GetKey(runningKey);

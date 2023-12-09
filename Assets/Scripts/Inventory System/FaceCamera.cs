@@ -6,7 +6,7 @@ using UnityEngine;
 public class FaceCamera : MonoBehaviour
 {
     // Update is called once per frame
-    void LateUpdate()
+    void Update()
     {
         // Check if Camera.main is not null
         if (Camera.main != null)

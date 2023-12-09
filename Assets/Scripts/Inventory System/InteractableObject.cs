@@ -57,12 +57,6 @@ public class InteractableObject : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-
-    }
-
     public void Interaction()
     {
         switch (interactionAction)

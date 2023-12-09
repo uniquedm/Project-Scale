@@ -110,12 +110,6 @@ public class GameManager : MonoBehaviour
         actionsDone = new HashSet<string>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void TriggerEvent(string eventName)
     {
         switch (eventName)

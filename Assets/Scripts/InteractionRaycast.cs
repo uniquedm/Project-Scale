@@ -66,17 +66,13 @@ public class InteractionRaycast : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (Inventory.Instance.itemsData.Count > 0)
         {
             inventoryPrompt.SetActive(!Inventory.Instance.inventoryUI.activeSelf);
         }
-    }
 
-    // Update is called once per frame
-    private void Update()
-    {
         #region New Interaction Raycaster
         InteractionRayCastTrigger();
         #endregion
