@@ -1,8 +1,10 @@
+using com.cyborgAssets.inspectorButtonPro;
 using Doublsb.Dialog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UI.Pagination;
 using UI.ThreeDimensional;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -73,6 +75,8 @@ public class Inventory : MonoBehaviour
     public TextMeshProUGUI itemNameUIText;
     public TextMeshProUGUI itemDescriptionUIText;
     private DialogManager dialogManager;
+    public PagedRect pagedRect;
+    public Dictionary<InventoryItem, Page> itemPageMap;
     [Header("Inventory Data")]
     public List<InventoryItem> itemsData;
     [Header("Inventory SFX")]
@@ -81,6 +85,11 @@ public class Inventory : MonoBehaviour
     public AudioClip inventoryCloseSFX;
     public AudioClip scrollSFX;
     public AudioClip itemUseSFX;
+    [Header("Inventory Interaction")]
+    [TextArea(3, 10)]
+    public string wrongItemDialog = "/color:#e84200/I don't think it can be used here.../close/";
+    public AudioClip wrongItemSFX;
+    public AudioClip correctItemSFX;
 
     private void PlaySFX(AudioClip sfxClip)
     {
@@ -94,6 +103,7 @@ public class Inventory : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        itemPageMap = new Dictionary<InventoryItem, Page>();
         dialogManager = FindAnyObjectByType<DialogManager>();
         itemsData = new List<InventoryItem>();
         audioSource = GetComponent<AudioSource>();
@@ -102,7 +112,6 @@ public class Inventory : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        
         if (Input.GetMouseButtonDown(1)) {
             ToggleInventory(!inventoryUI.activeSelf);
         }
@@ -117,12 +126,10 @@ public class Inventory : MonoBehaviour
 
             if (scrollInput > 0f) // Scroll Up
             {
-                PlaySFX(scrollSFX);
                 ToggleInventory(inventoryUI.activeSelf, currentIndex + 1);
             }
             else if (scrollInput < 0f) // Scroll Down
             {
-                PlaySFX(scrollSFX);
                 ToggleInventory(inventoryUI.activeSelf, currentIndex - 1);
             }
         }
@@ -148,9 +155,14 @@ public class Inventory : MonoBehaviour
         {
             StopAllCoroutines();
         }
+        else if (index == 0)
+        {
+            pagedRect.ShowFirstPage();
+        }
         inventoryUI.SetActive(toggle);
         inventoryUIBlur.SetActive(toggle);
-        inventoryCamera.SetActive(toggle);
+        // TODO: Check the issues with this
+        /*inventoryCamera.SetActive(toggle);*/
         Behaviour behaviour = this.GetComponent<FirstPersonMovement>();
         behaviour.enabled = !toggle;
         if (index < 0)
@@ -162,8 +174,16 @@ public class Inventory : MonoBehaviour
             index %= itemsData.Count;
         }
         currentIndex = index;
-        if (itemsData.Count > 0)
+        foreach (InventoryItem item in itemsData)
         {
+            if (!itemPageMap.ContainsKey(item))
+            {
+                itemPageMap.Add(item, AddPage(item));
+            }
+        }
+        if (itemsData.Count > 0 && itemsData[index].item != currentItem)
+        {
+            PlaySFX(scrollSFX);
             itemNameUIText.enabled = toggle;
             itemDescriptionUIText.enabled = toggle;
             itemsData[index].item.transform.parent = itemPreviewLocation.transform;
@@ -214,7 +234,8 @@ public class Inventory : MonoBehaviour
             if (itemsData[currentIndex].itemName != interactableObject.itemRequired)
             {
                 dialogManager.Hide();
-                DialogData dialogData = new DialogData("/color:#e84200/I don't think it can be used here.../close/", "Player", null, true);
+                DialogData dialogData = new DialogData(wrongItemDialog, "Player", null, true);
+                // TODO: Play wrong item SFX
                 dialogManager.Show(dialogData);
                 yield return null;
             }
@@ -222,6 +243,7 @@ public class Inventory : MonoBehaviour
             {
                 GameObject gameObject = itemsData[currentIndex].item;
                 itemsData.Remove(itemsData[currentIndex]);
+                RemoveCurrentPage();
                 Destroy(gameObject);
                 interactableObject.ItemsFound();
                 ToggleInventory(false);
@@ -233,5 +255,20 @@ public class Inventory : MonoBehaviour
     internal bool Open()
     {
         return this.inventoryUI.activeSelf;
+    }
+
+    public Page AddPage(InventoryItem item)
+    {
+        Page newPage = pagedRect.AddPageUsingTemplate();
+        UIObject3D objectPreview = newPage.GetComponentInChildren<UIObject3D>();
+        UIObject3DImage objectPreviImage = newPage.GetComponentInChildren<UIObject3DImage>();
+        objectPreview.ObjectPrefab = item.prefab.transform;
+        objectPreviImage.color = Color.white;
+        return newPage;
+    }
+
+    public void RemoveCurrentPage()
+    {
+        pagedRect.RemoveCurrentPage();
     }
 }

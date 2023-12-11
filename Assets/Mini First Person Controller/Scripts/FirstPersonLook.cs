@@ -6,15 +6,6 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
-[System.Serializable]
-
-public struct InteractionActionUI
-{
-    public InteractionAction action;
-    public Sprite icon;
-    public string materialIcon;
-}
-
 public class FirstPersonLook : MonoBehaviour
 {
     [SerializeField]

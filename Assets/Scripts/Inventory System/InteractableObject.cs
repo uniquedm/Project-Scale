@@ -6,6 +6,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 using Random = UnityEngine.Random;
 
 // Define the InteractionAction enum
@@ -22,8 +23,6 @@ public class InteractableObject : MonoBehaviour
 {
     [Header("Interaction Details")]
     public InteractionAction interactionAction;
-    public GameObject interactionWorldUI;
-    public GameObject interactionWorldUIInstance;
     [Header("Inventory Details")]
     public string itemName;
     public string itemDescription;
@@ -49,6 +48,7 @@ public class InteractableObject : MonoBehaviour
     public string actionName;
     public List<GameObjectToggleEvent> completionToggles;
     public List<BehaviourToggleEvent> completionBehaviors;
+    public UnityEvent completionEvent;
     // Start is called before the first frame update
     void Start()
     {
@@ -129,6 +129,7 @@ public class InteractableObject : MonoBehaviour
         {
             toggleBehaviors.behaviour.enabled = toggleBehaviors.active;
         }
+        completionEvent.Invoke();
     }
 
     private void ShowDialogs(DialogInputData[] dialogs)
@@ -159,31 +160,5 @@ public class InteractableObject : MonoBehaviour
                                                     this.prefab);
         inventory.ItemsData.Add(itemData);
         this.gameObject.SetActive(false);
-    }
-
-    public void InteractionUI(Boolean active)
-    {
-        if (interactionWorldUIInstance == null)
-        {
-            interactionWorldUIInstance = GameObject.Instantiate(interactionWorldUI, transform, true);
-            interactionWorldUIInstance.transform.localPosition = Vector3.zero;
-        }
-        TextMeshProUGUI interactionText = interactionWorldUIInstance.GetComponentInChildren<TextMeshProUGUI>();
-        if (interactionText != null)
-        {
-            interactionText.text = itemName;
-        }
-        interactionWorldUIInstance.SetActive(active);
-        if (active==false)
-        {
-            Destroy(interactionWorldUIInstance);
-            interactionWorldUIInstance = null;
-        }
-    }
-
-    public void OnDisable()
-    {
-        Destroy(interactionWorldUIInstance);
-        interactionWorldUIInstance = null;
     }
 }

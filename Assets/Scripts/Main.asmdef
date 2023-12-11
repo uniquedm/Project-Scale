@@ -1,0 +1,30 @@
+{
+    "name": "Main",
+    "rootNamespace": "",
+    "references": [
+        "LeanGUI",
+        "Unity.VisualScripting.Core",
+        "Unity.TextMeshPro",
+        "DDSystem",
+        "UIObject3D",
+        "InspectorButtonPro",
+        "Unity.InputSystem",
+        "MaterialIcon",
+        "Unity.RenderPipelines.Universal.Editor",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipeline.Universal.ShaderLibrary",
+        "Unity.RenderPipelines.Universal.Shaders",
+        "Unity.RenderPipelines.Core.Runtime",
+        "FPSController",
+        "UIPagination"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

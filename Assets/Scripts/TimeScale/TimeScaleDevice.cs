@@ -56,6 +56,8 @@ public class TimeScaleDevice : MonoBehaviour
     public Boolean disableTimeScale = false;
     private bool isBeingReversedCoroutineRunning = false;
     public string timescaleEventNotificationText = "Timescale Event Available!";
+    public Color notificationColor = Color.yellow;
+    public Color notificationTextColor = Color.white;
 
 
     // Ensure the instance is not destroyed when reloading the scene
@@ -148,7 +150,7 @@ public class TimeScaleDevice : MonoBehaviour
         Boolean canReverse = reverseEventAnimator != null && triggerEvent != null;
         if (canReverse)
         {
-            GameManager.Notify(timescaleEventNotificationText);
+            GameManager.Instance.Notify(timescaleEventNotificationText, notificationColor, notificationTextColor);
         }
         return canReverse;
     }

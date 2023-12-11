@@ -103,6 +103,9 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI notificationText;
     public static LeanPulse notificationUIStatic;
     public static TextMeshProUGUI notificationTextStatic;
+    public Image backgroundImage;
+    public Color defaultBackgroundColor = Color.white;
+    public Color defaultFontColor = Color.black;
 
     // Start is called before the first frame update
     void Start()
@@ -173,6 +176,7 @@ public class GameManager : MonoBehaviour
     private void GeneratorStart()
     {
         actionsDone.Add("GeneratorPowered");
+        NotifySuccess("Generator Powered Up!");
         generatorEvents.Invoke();
     }
 
@@ -232,6 +236,7 @@ public class GameManager : MonoBehaviour
             if (itemSlot < inventorySlots.Count)
             {
                 inventorySlots[itemSlot].ObjectPrefab = inventoryItem.prefab.transform;
+                inventorySlots[itemSlot].GetComponent<UIObject3DImage>().color = Color.white;
                 slotsUsed.Add(itemSlot);
             }
         }
@@ -257,7 +262,7 @@ public class GameManager : MonoBehaviour
 
     private void TimescaleFixed()
     {
-        Debug.Log("Timescale Fixed!");
+        NotifySuccess("Timescale Fixed!");
         Inventory.Instance.itemsData.Clear();
         actionsDone.Add("Timescale Fixed");
         TriggerEvent("Exit Workbench");
@@ -326,8 +331,25 @@ public class GameManager : MonoBehaviour
         Notify("Testing");
     }
 
-    public static void Notify(string message)
+    public void NotifySuccess(string message)
     {
+        Color actualBackgroundColor = Color.blue;
+        Color actualFontColor = Color.white;
+        Notify(message, actualBackgroundColor, actualFontColor);
+    }
+
+    public void Notify(string message, Color? backgroundColor = null, Color? fontColor = null)
+    {
+        Color actualBackgroundColor = backgroundColor ?? Instance.defaultBackgroundColor;
+        Color actualFontColor = fontColor ?? Instance.defaultFontColor;
+        if (Instance.backgroundImage != null)
+        {
+            Instance.backgroundImage.color = actualBackgroundColor;
+        }
+        if (notificationTextStatic != null)
+        {
+            notificationTextStatic.color = actualFontColor;
+        }
         notificationTextStatic.text = message;
         notificationUIStatic.Pulse();
     }
