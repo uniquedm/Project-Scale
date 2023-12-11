@@ -155,12 +155,12 @@ public class Inventory : MonoBehaviour
         {
             StopAllCoroutines();
         }
-        else if (index == 0)
+        inventoryUI.SetActive(toggle);
+        inventoryUIBlur.SetActive(toggle);
+        if (toggle && index == 0)
         {
             pagedRect.ShowFirstPage();
         }
-        inventoryUI.SetActive(toggle);
-        inventoryUIBlur.SetActive(toggle);
         // TODO: Check the issues with this
         /*inventoryCamera.SetActive(toggle);*/
         Behaviour behaviour = this.GetComponent<FirstPersonMovement>();
@@ -184,8 +184,8 @@ public class Inventory : MonoBehaviour
         if (itemsData.Count > 0 && itemsData[index].item != currentItem)
         {
             PlaySFX(scrollSFX);
-            itemNameUIText.enabled = toggle;
-            itemDescriptionUIText.enabled = toggle;
+            itemNameUIText.enabled = true;
+            itemDescriptionUIText.enabled = true;
             itemsData[index].item.transform.parent = itemPreviewLocation.transform;
             itemsData[index].item.transform.localPosition = Vector3.zero;
             itemsData[index].item.tag = "Untagged";
