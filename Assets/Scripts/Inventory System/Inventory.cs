@@ -3,6 +3,7 @@ using Doublsb.Dialog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UI.Pagination;
 using UI.ThreeDimensional;
@@ -69,14 +70,12 @@ public class Inventory : MonoBehaviour
     public GameObject inventoryCamera;
     public GameObject itemPreviewLocation;
     public int focusedLayer;
-    private GameObject currentItem;
-    public float rotationSpeed = 10f;
-    private int currentIndex = 0;
     public TextMeshProUGUI itemNameUIText;
     public TextMeshProUGUI itemDescriptionUIText;
     private DialogManager dialogManager;
     public PagedRect pagedRect;
     public Dictionary<InventoryItem, Page> itemPageMap;
+    public Dictionary<Page, InventoryItem> pageItemMap;
     [Header("Inventory Data")]
     public List<InventoryItem> itemsData;
     [Header("Inventory SFX")]
@@ -104,6 +103,7 @@ public class Inventory : MonoBehaviour
     void Start()
     {
         itemPageMap = new Dictionary<InventoryItem, Page>();
+        pageItemMap = new Dictionary<Page, InventoryItem>();
         dialogManager = FindAnyObjectByType<DialogManager>();
         itemsData = new List<InventoryItem>();
         audioSource = GetComponent<AudioSource>();
@@ -112,98 +112,29 @@ public class Inventory : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (Input.GetMouseButtonDown(1)) {
-            ToggleInventory(!inventoryUI.activeSelf);
+        if (Input.GetMouseButtonDown(1) && Time.deltaTime !=0) {
+            if (IsOpen())
+            {
+                CloseInventory();
+            }
+            else 
+            {
+                OpenInventory();
+            }
         }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            ToggleInventory(false);
-        }
-
-        if (inventoryUI.activeSelf)
-        {
-            float scrollInput = Input.GetAxis("Mouse ScrollWheel");
-
-            if (scrollInput > 0f) // Scroll Up
-            {
-                ToggleInventory(inventoryUI.activeSelf, currentIndex + 1);
-            }
-            else if (scrollInput < 0f) // Scroll Down
-            {
-                ToggleInventory(inventoryUI.activeSelf, currentIndex - 1);
-            }
-        }
-
-        if (currentItem != null)
-        {
-            // Calculate the rotation angle based on time
-            float angle = Mathf.Repeat(Time.time * rotationSpeed, 360f);
-
-            // Set the rotation of the object around the y-axis
-            currentItem.transform.localRotation = Quaternion.Euler(-66f, angle, 0f);
+            CloseInventory();
         }
     }
 
-    public void ToggleInventory(bool toggle, int index = 0)
+    public void PageChanged()
     {
-        if (toggle && itemsData.Count == 0)
+        Debug.Log("Called from Paginator!");
+        PlaySFX(scrollSFX);
+        if (IsOpen())
         {
-            ToggleInventory(false, index);
-            return;
-        }
-        if (!toggle)
-        {
-            StopAllCoroutines();
-        }
-        inventoryUI.SetActive(toggle);
-        inventoryUIBlur.SetActive(toggle);
-        if (toggle && index == 0)
-        {
-            pagedRect.ShowFirstPage();
-        }
-        // TODO: Check the issues with this
-        /*inventoryCamera.SetActive(toggle);*/
-        Behaviour behaviour = this.GetComponent<FirstPersonMovement>();
-        behaviour.enabled = !toggle;
-        if (index < 0)
-        {
-            index = itemsData.Count - 1;
-        }
-        else if (itemsData.Count > 0)
-        {
-            index %= itemsData.Count;
-        }
-        currentIndex = index;
-        foreach (InventoryItem item in itemsData)
-        {
-            if (!itemPageMap.ContainsKey(item))
-            {
-                itemPageMap.Add(item, AddPage(item));
-            }
-        }
-        if (itemsData.Count > 0 && itemsData[index].item != currentItem)
-        {
-            PlaySFX(scrollSFX);
-            itemNameUIText.enabled = true;
-            itemDescriptionUIText.enabled = true;
-            itemsData[index].item.transform.parent = itemPreviewLocation.transform;
-            itemsData[index].item.transform.localPosition = Vector3.zero;
-            itemsData[index].item.tag = "Untagged";
-            itemsData[index].item.layer = focusedLayer;
-            itemsData[index].item.GetComponent<BoxCollider>().enabled = false;
-            currentItem = itemsData[index].item;
-            InteractableObject interactableObject = itemsData[index].item.GetComponent<InteractableObject>();
-            itemNameUIText.text = interactableObject.itemName;
-            itemDescriptionUIText.text = interactableObject.itemDescription;
-            for (int i = 0; i < itemsData.Count; i++) {
-                if (i==index) {
-                    itemsData[i].item.SetActive(toggle);
-                }
-                else
-                {
-                    itemsData[i].item.SetActive(false);
-                }
-            }
+            ChangeInventoryPage();
         }
     }
 
@@ -211,7 +142,7 @@ public class Inventory : MonoBehaviour
     {
         if (itemsData.Count > 0)
         {
-            ToggleInventory(true);
+            OpenInventory();
             StartCoroutine(CheckItemSelection(interactableObject));
         }
     }
@@ -222,37 +153,93 @@ public class Inventory : MonoBehaviour
         // Continue checking until the item names match
         while (!itemMatched)
         {
-            Debug.Log("Running Coroutine!");
             // Wait for a left mouse click
             while (!Input.GetMouseButtonDown(0))
             {
                 yield return null;
             }
-            Debug.Log("Checking!");
-            Debug.Log(itemsData[currentIndex].itemName + " -> " + interactableObject.itemRequired);
+            InventoryItem currentItem = pageItemMap[pagedRect.GetCurrentPage()];
+            Debug.Log(currentItem.itemName + " -> " + interactableObject.itemRequired);
             // Mouse click detected, perform your logic
-            if (itemsData[currentIndex].itemName != interactableObject.itemRequired)
+            if (currentItem.itemName != interactableObject.itemRequired)
             {
                 dialogManager.Hide();
                 DialogData dialogData = new DialogData(wrongItemDialog, "Player", null, true);
-                // TODO: Play wrong item SFX
+                PlaySFX(wrongItemSFX);
                 dialogManager.Show(dialogData);
                 yield return null;
             }
             else
             {
-                GameObject gameObject = itemsData[currentIndex].item;
-                itemsData.Remove(itemsData[currentIndex]);
-                RemoveCurrentPage();
-                Destroy(gameObject);
+                RemoveItem(currentItem);
+                PlaySFX(correctItemSFX);
                 interactableObject.ItemsFound();
-                ToggleInventory(false);
-                itemMatched = true; // Set the flag to exit the loop
+                // Wait for 1 second
+                yield return new WaitForSeconds(0.01f);
+                Debug.Log("Done Invoking");
+                CloseInventory();
+                // Set the flag to exit the loop
+                itemMatched = true;
             }
         }
     }
 
-    internal bool Open()
+    private void RemoveItem(InventoryItem currentItem)
+    {
+        Debug.Log("Removing");
+        GameObject gameObject = currentItem.item;
+        itemsData.Remove(currentItem);
+        pageItemMap.Remove(itemPageMap[currentItem]);
+        itemPageMap.Remove(currentItem);
+        Debug.Log(pagedRect.Pages.Count);
+        pagedRect.RemoveCurrentPage();
+        Debug.Log(pagedRect.Pages.Count);
+        Destroy(gameObject);
+    }
+
+    public void OpenInventory()
+    {
+        if (itemsData.Count == 0)
+        {
+            CloseInventory();
+            return;
+        }
+        foreach (InventoryItem item in itemsData)
+        {
+            if (!itemPageMap.ContainsKey(item))
+            {
+                Page newPage = AddPage(item);
+                itemPageMap.Add(item, newPage);
+                pageItemMap.Add(newPage, item);
+            }
+        }
+        inventoryUI.SetActive(true);
+        inventoryUIBlur.SetActive(true);
+        Behaviour behaviour = this.GetComponent<FirstPersonMovement>();
+        behaviour.enabled = false;
+        Debug.Log("Called from Open Inventory!");
+        ChangeInventoryPage();
+    }
+
+    public void ChangeInventoryPage()
+    {
+        InventoryItem currentItem = pageItemMap[pagedRect.GetCurrentPage()];
+        itemNameUIText.enabled = true;
+        itemDescriptionUIText.enabled = true;
+        itemNameUIText.text = currentItem.itemName;
+        itemDescriptionUIText.text = currentItem.itemDescription;
+    }
+
+    public void CloseInventory()
+    {
+        StopAllCoroutines();
+        inventoryUI.SetActive(false);
+        inventoryUIBlur.SetActive(false);
+        Behaviour behaviour = this.GetComponent<FirstPersonMovement>();
+        behaviour.enabled = true;
+    }
+
+    internal bool IsOpen()
     {
         return this.inventoryUI.activeSelf;
     }
@@ -265,10 +252,5 @@ public class Inventory : MonoBehaviour
         objectPreview.ObjectPrefab = item.prefab.transform;
         objectPreviImage.color = Color.white;
         return newPage;
-    }
-
-    public void RemoveCurrentPage()
-    {
-        pagedRect.RemoveCurrentPage();
     }
 }

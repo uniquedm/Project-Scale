@@ -95,7 +95,7 @@ public class InteractionRaycast : MonoBehaviour
             inventoryPrompt.SetActive(!Inventory.Instance.inventoryUI.activeSelf);
         }
         #region New Interaction Raycaster
-        if (Inventory.Instance.Open())
+        if (Inventory.Instance.IsOpen())
         {
             playerCrosshair.enabled = false;
             playerInteractionUI.SetActive(false);

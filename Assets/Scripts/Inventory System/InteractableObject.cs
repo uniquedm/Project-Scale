@@ -110,7 +110,7 @@ public class InteractableObject : MonoBehaviour
         else
         {
             Inventory.Instance.CheckInventory(this);
-            if (Inventory.Instance.Open())
+            if (Inventory.Instance.IsOpen())
             {
                 return;
             }
